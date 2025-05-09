@@ -8,8 +8,8 @@ function Home() {
     
       {/* first div */}
       <div>
-        <div className="w-[1200px] bg-white">
-          {" "}
+        <div className="w-[100%] bg-white">
+          
           <div
             className="relative w-full h-[400px]"
             style={{
@@ -19,25 +19,28 @@ function Home() {
               backgroundPosition: "center",
             }}
           ></div>
-          <div className="p-8">
-            <h1 className="text-2xl font-title font-bold text-neutral-950 mb-4">
-              Empowering newcomers to thrive in unfamiliar towns
-            </h1>
-            <div className="flex gap-4">
-              <button className="bg-black text-white rounded-md px-6 py-2 text-sm">
-                Explore
-              </button>
-              <button className="border border-neutral-950 text-neutral-950 rounded-md px-6 py-2 text-sm">
-                Learn More
-              </button>
-            </div>
-          </div>
+        
         </div>
       </div>
 
+      <div className="p-8">
+  <h1 className="text-2xl text-center font-title font-bold text-neutral-950 mb-4">
+    Empowering newcomers to thrive in unfamiliar towns
+  </h1>
+  <div className="flex justify-center gap-4">
+    <button className="bg-black text-white rounded-md px-6 py-2 text-sm">
+      Explore
+    </button>
+    <button className="border border-neutral-950 text-neutral-950 rounded-md px-6 py-2 text-sm">
+      Learn More
+    </button>
+  </div>
+</div>
+
+
       {/* second Div */}
       <div >
-        <div className="w-[1200px] bg-white  p-8 flex items-center gap-12">
+        <div className="w-[100%] bg-white  p-8 flex items-center gap-12">
           {" "}
           <div className="w-1/2">
             <h1 className="text-2xl font-title font-bold text-neutral-950 mb-6">
@@ -93,7 +96,7 @@ function Home() {
 
       {/* Third Div */}
       <div>
-        <div className="w-[1200px] bg-white  p-8 flex flex-col items-center gap-12">
+        <div className="w-[100%] bg-white  p-8 flex flex-col items-center gap-12">
           <div className="text-center">
             <h1 className="text-3xl font-title font-bold text-neutral-950 mb-6">
               Discover a New World with Sehar-Saipathi
@@ -163,10 +166,10 @@ function Home() {
 
       {/* fourth Div */}
       <div >
-        <div className="w-[1200px] bg-white  p-8 flex flex-col gap-12">
+        <div className="w-[100%] bg-white  p-8 flex flex-col gap-12">
           {" "}
           <div className="flex justify-between items-start">
-            <div className="w-[50%]">
+            <div className="w-[100%]">
               <h1 className="text-4xl font-title font-bold text-neutral-950 mb-6">
                 Effortlessly navigate the platform for seamless integration
               </h1>
@@ -231,7 +234,7 @@ function Home() {
 
       {/* Fifth Div */}
       <div >
-        <div className="w-[1200px] bg-white  p-8 flex flex-col gap-12">
+        <div className="w-[100%] bg-white  p-8 flex flex-col gap-12">
           {" "}
           <div className="flex justify-between items-start gap-8">
             <div className="w-[50%]">
@@ -273,7 +276,7 @@ function Home() {
       {/* Sixth Div */}
 
       <div >
-        <div className="w-[1200px] bg-white  p-10 flex flex-col items-center gap-10">
+        <div className="w-[100%] bg-white  p-10 flex flex-col items-center gap-10">
           {" "}
           <div className="text-center">
             <div className="text-2xl flex justify-center text-primary-500 mb-4">
