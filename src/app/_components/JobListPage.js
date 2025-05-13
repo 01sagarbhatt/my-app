@@ -1,5 +1,4 @@
-"use client";
-import { useState, useEffect } from "react";
+import { useCallback, useState, useEffect } from "react";
 
 export default function JobSearch() {
   const [jobs, setJobs] = useState([]);
@@ -21,7 +20,7 @@ export default function JobSearch() {
     "jaipur",
   ];
 
-  const fetchJobs = async () => {
+  const fetchJobs = useCallback(async () => {
     setLoading(true);
     setError(null);
 
@@ -33,8 +32,7 @@ export default function JobSearch() {
         {
           method: "GET",
           headers: {
-            "X-RapidAPI-Key":
-              "1bdd6ee0b5msh3347fb57232f909p11164ejsn182e9f862d74",
+            "X-RapidAPI-Key": "1bdd6ee0b5msh3347fb57232f909p11164ejsn182e9f862d74",
             "X-RapidAPI-Host": "jsearch.p.rapidapi.com",
           },
         }
@@ -50,30 +48,11 @@ export default function JobSearch() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const fetchJobDetails = async (jobId) => {
-    try {
-      const response = await fetch(
-        `https://jsearch.p.rapidapi.com/job-details?job_id=${jobId}`,
-        {
-          headers: {
-            "X-RapidAPI-Key":
-              "1bdd6ee0b5msh3347fb57232f909p11164ejsn182e9f862d74",
-            "X-RapidAPI-Host": "jsearch.p.rapidapi.com",
-          },
-        }
-      );
-      const data = await response.json();
-      setSelectedJob(data.data[0]);
-    } catch (error) {
-      console.error("Failed to fetch job details:", error);
-    }
-  };
+  }, [city, searchTerm]); // Important: dependencies used inside fetchJobs
 
   useEffect(() => {
     fetchJobs();
-  }, [city]);
+  }, [fetchJobs]);
 
   return (
     <div className="container mx-auto p-4 max-w-7xl">

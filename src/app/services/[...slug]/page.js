@@ -4,6 +4,7 @@ import { useParams } from 'next/navigation'; // import useParams hook
 import CollegeListPage from '@/app/_components/CollegeListPage';
 import RoomsList from '@/app/_components/RoomsList';
 import JobsPage from '@/app/_components/JobListPage';
+import UserManagement from '@/app/_components/UserManagement';
 
 
 export default function AdminSlugPage() {
