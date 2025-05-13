@@ -4,6 +4,8 @@ import Image from "next/image";
 import Head from "next/head";
 
 export default function Home() {
+
+  
   return (
     <>
       <Head>
@@ -212,7 +214,7 @@ export default function Home() {
             </div>
             <blockquote className="blockquote mb-5">
               <p className="fs-4">
-                Sehar Sehpathi has been a game-changer for me. It provided me with all the necessary information to smoothly transition to a new town.
+                Sehar Sehpathi has been a game-changer for me. It provided me with all the necessary information to smoothly transition to a new town.  
               </p>
               <footer className="blockquote-footer mt-3">Satisfied User</footer>
             </blockquote>

@@ -1,39 +1,21 @@
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
-import { connectToDatabase } from "../../../lib/mongodb";
 
-const handler = NextAuth({
+export const authOptions = {
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      authorization: {
+        params: {
+          redirect_uri: `${process.env.NEXTAUTH_URL}/api/auth/callback/google`,
+          prompt: "consent",
+          access_type: "offline"
+        }
+      }
     }),
   ],
-  callbacks: {
-    async signIn({ user }) {
-      try {
-        const { db } = await connectToDatabase();
-        const usersCollection = db.collection("users");
-
-        const existingUser = await usersCollection.findOne({ email: user.email });
-
-        if (!existingUser) {
-          await usersCollection.insertOne({
-            name: user.name,
-            email: user.email,
-            image: user.image,
-            createdAt: new Date(),
-          });
-        }
-
-        return true;
-      } catch (error) {
-        console.error("Error saving user to MongoDB", error);
-        return false;
-      }
-    },
-  },
   secret: process.env.NEXTAUTH_SECRET,
-});
+};
 
-export { handler as GET, handler as POST };
+export default NextAuth(authOptions);
