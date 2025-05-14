@@ -1,6 +1,8 @@
 "use client";
 import React from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
+import { useSession } from 'next-auth/react';
 
 const AboutUs = () => {
   return (
@@ -181,9 +183,15 @@ const AboutUs = () => {
       <div className="bg-light py-5">
         <div className="container text-center py-4">
           <h2 className="fw-bold mb-4">Ready to Begin Your Journey?</h2>
-          <button className="btn btn-primary btn-lg px-5">
-          
+           <Link 
+                  href="/signup" 
+                
+                >
+                    <button className="btn btn-primary btn-lg px-5">
+          Sign Up Now
           </button>
+                </Link>
+       
         </div>
       </div>
 

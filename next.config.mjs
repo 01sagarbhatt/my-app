@@ -6,28 +6,40 @@ const nextConfig = {
         source: '/api/auth/:path*',
         headers: [
           { key: 'Access-Control-Allow-Origin', value: 'https://seharsehpathi.in' },
-        ],
+          { key: 'Access-Control-Allow-Methods', value: 'GET,POST,PUT,DELETE,OPTIONS' },
+          { key: 'Access-Control-Allow-Headers', value: 'Content-Type, Authorization' },
+          { key: 'Access-Control-Allow-Credentials', value: 'true' }
+        ]
       },
+      // Add security headers for all routes
+      {
+        source: '/(.*)',
+        headers: [
+          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' }
+        ]
+      }
     ]
   },
-     images: {
+
+  images: {
     domains: [
-         'img.freepik.com',
+      'lh3.googleusercontent.com', // Google OAuth user avatars
+      'cdn1.iconfinder.com',
+      'img.freepik.com',
       'images.pexels.com',
       'plus.unsplash.com',
-      'images.unsplash.com',
-      // Add other domains you use here
+      'images.unsplash.com'
     ],
-    
-    // OR use remotePatterns for more control:
     remotePatterns: [
-       {
+      {
         protocol: 'https',
         hostname: 'img.freepik.com',
       },
       {
         protocol: 'https',
-        hostname: '**.freepik.com', // सभी फ्रीपिक सबडोमेन के लिए
+        hostname: '**.freepik.com',
       },
       {
         protocol: 'https',
@@ -41,8 +53,30 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'plus.unsplash.com',
       },
+      // Add Google's OAuth domains
+      {
+        protocol: 'https',
+        hostname: '**.googleusercontent.com',
+      }
     ],
+    minimumCacheTTL: 60, // Cache images for 60 seconds
   },
+
+  // Required for NextAuth.js in production
+  async rewrites() {
+    return [
+      {
+        source: '/login',
+        destination: '/api/auth/signin',
+      }
+    ]
+  },
+
+  // Enable React Strict Mode
+  reactStrictMode: true,
+
+  // For Vercel deployments
+  output: 'standalone' // Recommended for production
 };
 
 export default nextConfig;

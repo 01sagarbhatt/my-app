@@ -2,7 +2,8 @@
 import React from "react";
 import Image from "next/image";
 import Head from "next/head";
-
+import Link from "next/link";
+import { useSession } from "next-auth/react";
 export default function Home() {
 
   
@@ -22,8 +23,14 @@ export default function Home() {
                 <h1 className="display-4 fw-bold mb-4">Welcome to Your New Beginning</h1>
                 <p className="lead mb-5">Simplifying relocation for migrants and students</p>
                 <div className="d-flex justify-content-center gap-3">
-                  <button className="btn btn-primary btn-lg px-4">Explore</button>
-                  <button className="btn btn-outline-light btn-lg px-4">Learn More</button>
+                   <Link href="/signup">
+                    <button className="btn btn-primary btn-lg px-4">Explore</button>
+                    </Link>
+                   <Link href="/about">
+                                     <button className="btn btn-outline-light btn-lg px-4">Learn More</button>
+
+                    </Link>
+
                 </div>
               </div>
               <div className="hero-image" style={{height: "600px", background: "linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=2070&auto=format&fit=crop')", backgroundSize: "cover", backgroundPosition: "center"}}></div>
@@ -129,7 +136,13 @@ export default function Home() {
                     <p className="card-text">{service.desc}</p>
                   </div>
                   <div className="card-footer bg-transparent border-0">
-                    <a href="#" className="btn btn-sm btn-outline-primary">Learn more</a>
+                     <Link 
+                  href="/signup" 
+                  className="btn btn-outline-dark me-2 rounded-5 px-3"
+                >
+                  Learn more
+                </Link>
+                
                   </div>
                 </div>
               </div>
@@ -186,7 +199,8 @@ export default function Home() {
               <p className="mb-4">
                 At Sehar Sehpathi, our mission is to empower migrants and students by providing them with the essential information and resources they need to navigate their new environments.
               </p>
-              <button className="btn btn-light">Learn About Our Mission</button>
+ <Link href="/about"><button className="btn btn-light">Learn About Our Mission</button>
+                </Link>
             </div>
             <div className="col-lg-6">
               <div className="ratio ratio-16x9 rounded-3 overflow-hidden shadow-lg">
@@ -220,8 +234,14 @@ export default function Home() {
             </blockquote>
             <h3 className="fw-bold mb-4">Ready for Your New Beginning?</h3>
             <div className="d-flex justify-content-center gap-3">
-              <button className="btn btn-dark btn-lg px-4">Sign Up Now</button>
-              <button className="btn btn-outline-secondary btn-lg px-4">Learn More</button>
+               <Link href="/signup">
+                  <button className="btn btn-dark btn-lg px-4">Sign Up Now</button>
+                </Link>
+               <Link href="/about">
+                <button className="btn btn-outline-secondary btn-lg px-4">Learn More</button>
+
+                </Link>
+              
             </div>
           </div>
         </div>

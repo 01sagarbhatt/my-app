@@ -5,25 +5,34 @@ export default function RoomsList() {
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchRooms = async () => {
-      try {
-        const response = await fetch('/api/rooms');
-        const data = await response.json();
-        if (data.success) {
-          setRooms(data.result);
-        } else {
-          console.error('Error fetching rooms:', data.error);
-        }
-      } catch (error) {
-        console.error('Failed to fetch rooms:', error);
-      } finally {
-        setLoading(false);
+useEffect(() => {
+  const fetchRooms = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/rooms');
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-    };
 
-    fetchRooms();
-  }, []);
+      const data = await response.json();
+      
+      if (data.success) {
+        setRooms(data.result);
+      } else {
+        console.error('Error from API:', data.error);
+        // Optionally set an error state here
+      }
+    } catch (error) {
+      console.error('Failed to fetch rooms:', error.message);
+      // Optionally set an error state here
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchRooms();
+}, []);
 
   // Function to render amenities badges
   const renderAmenities = (amenities) => {

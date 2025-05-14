@@ -10,6 +10,7 @@ export default function ContactSection() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [error, setError] = useState(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -19,20 +20,36 @@ export default function ContactSection() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setError(null);
     
-    // Simulate form submission
-    setTimeout(() => {
-      console.log('Form submitted:', formData);
-      setIsSubmitting(false);
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to submit form');
+      }
+
       setSubmitSuccess(true);
       setFormData({ name: '', email: '', message: '' });
       
       // Reset success message after 5 seconds
       setTimeout(() => setSubmitSuccess(false), 5000);
-    }, 1500);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -100,15 +117,21 @@ export default function ContactSection() {
                 ) : 'Send Message'}
               </button>
               
+              {error && (
+                <div className="alert alert-danger mt-3 mb-0">
+                  {error}
+                </div>
+              )}
+              
               {submitSuccess && (
                 <div className="alert alert-success mt-3 mb-0">
-                  Thank you! Your message has been sent. Well get back to you soon.
+                  Thank you! Your message has been sent. We will get back to you soon.
                 </div>
               )}
             </form>
           </div>
           
-          {/* Right Side - Image and Social Media */}
+            {/* Right Side - Image and Social Media */}
           <div className="col-md-6 bg-light p-4 p-md-5 d-flex flex-column">
             <div className="mb-4 ratio ratio-16x9 bg-secondary bg-opacity-10 rounded overflow-hidden">
               <Image 
@@ -127,7 +150,7 @@ export default function ContactSection() {
                 {/* Twitter Card */}
                 <div className="col-md-4">
                   <a 
-                    href="https://twitter.com/yourhandle" 
+                    href="#" 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="card h-100 text-decoration-none hover-shadow"
@@ -143,7 +166,7 @@ export default function ContactSection() {
                 {/* Instagram Card */}
                 <div className="col-md-4">
                   <a 
-                    href="https://instagram.com/yourhandle" 
+                    href="#" 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="card h-100 text-decoration-none hover-shadow"
@@ -159,7 +182,7 @@ export default function ContactSection() {
                 {/* Facebook Card */}
                 <div className="col-md-4">
                   <a 
-                    href="https://facebook.com/yourpage" 
+                    href="#" 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="card h-100 text-decoration-none hover-shadow"
@@ -178,7 +201,7 @@ export default function ContactSection() {
       </div>
       
       {/* Stay Updated Section */}
-      <div className="card bg-primary text-white mt-4 mt-md-5 shadow-lg">
+  <div className="card bg-primary text-white mt-4 mt-md-5 shadow-lg">
         <div className="card-body p-4 p-md-5 text-center">
           <h2 className="h2 mb-2">Stay Updated</h2>
           <p className="mb-4 opacity-75">
