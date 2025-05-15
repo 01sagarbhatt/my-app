@@ -7,6 +7,7 @@ export default function JobSearch() {
   const [city, setCity] = useState("dehradun");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedJob, setSelectedJob] = useState(null);
+  const [detailsLoading, setDetailsLoading] = useState(false);
 
   const cities = [
     "dehradun",
@@ -23,6 +24,7 @@ export default function JobSearch() {
   const fetchJobs = useCallback(async () => {
     setLoading(true);
     setError(null);
+    setSelectedJob(null); // Clear selected job when new search is performed
 
     try {
       const response = await fetch(
@@ -48,7 +50,33 @@ export default function JobSearch() {
     } finally {
       setLoading(false);
     }
-  }, [city, searchTerm]); // Important: dependencies used inside fetchJobs
+  }, [city, searchTerm]);
+
+  const fetchJobDetails = useCallback(async (jobId) => {
+    setDetailsLoading(true);
+    try {
+      const response = await fetch(
+        `https://jsearch.p.rapidapi.com/job-details?job_id=${jobId}`,
+        {
+          method: "GET",
+          headers: {
+            "X-RapidAPI-Key": "1bdd6ee0b5msh3347fb57232f909p11164ejsn182e9f862d74",
+            "X-RapidAPI-Host": "jsearch.p.rapidapi.com",
+          },
+        }
+      );
+
+      if (!response.ok) throw new Error("Failed to fetch job details");
+
+      const data = await response.json();
+      setSelectedJob(data.data[0]); // Assuming the API returns an array with one job
+    } catch (err) {
+      console.error("Error fetching job details:", err);
+      setError("Failed to load job details");
+    } finally {
+      setDetailsLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     fetchJobs();
@@ -84,7 +112,7 @@ export default function JobSearch() {
         </select>
 
         <button
-          className="btn btn-primary px-6 py-3 rounded-lg text-white font-semibold transition-colors duration-200 hover:bg-blue-600 ms-3"
+          className="btn btn-primary px-6 py-3 rounded-lg text-white font-semibold transition-colors duration-200 hover:bg-blue-600"
           onClick={fetchJobs}
           disabled={loading}
         >
@@ -130,7 +158,7 @@ export default function JobSearch() {
                   key={job.job_id}
                   className={`border p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer ${
                     selectedJob?.job_id === job.job_id
-                      ? "ring-2 ring-blue-500"
+                      ? "ring-2 ring-blue-500 bg-blue-50"
                       : ""
                   }`}
                   onClick={() => fetchJobDetails(job.job_id)}
@@ -176,72 +204,71 @@ export default function JobSearch() {
         </div>
 
         {/* Job Details Panel */}
-        <div className="w-100 mt-3">
-          {selectedJob ? (
-            <div className="sticky p-3 top-4 bg-white p-6 rounded-lg shadow-lg border">
-          <div className="d-flex">
-                <h2 className="text-2xl font-bold mb-2">
-                {selectedJob.job_title}
-              </h2>
-              <h6 className="text-lg mt-3 ms-3 text-gray-700 mb-4">
-                {selectedJob.employer_name}
-              </h6>
-          </div>
-              <div className="container">
-                <div className="row">
-                  <div className="col-4">
-                    <div className="grid grid-cols-2 gap-4 mb-6">
-                      <div>
-                        <p className="text-sm text-gray-500">Location</p>
-                        <p>
-                          {selectedJob.job_city ||
-                            city.charAt(0).toUpperCase() + city.slice(1)}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-gray-500">Job Type</p>
-                        <p>{selectedJob.job_employment_type || "Full-time"}</p>
-                      </div>
-                      {selectedJob.job_min_salary && (
-                        <>
-                          <div>
-                            <p className="text-sm text-gray-500">
-                              Salary Range
-                            </p>
-                            <p>
-                              {selectedJob.job_min_salary} -{" "}
-                              {selectedJob.job_max_salary}{" "}
-                              {selectedJob.job_salary_currency}
-                            </p>
-                          </div>
-                        </>
-                      )}
-                      <div>
-                        <p className="text-sm text-gray-500">Posted</p>
-                        <p>
-                          {selectedJob.job_posted_at_timestamp
-                            ? new Date(
-                                selectedJob.job_posted_at_timestamp * 1000
-                              ).toLocaleDateString()
-                            : "Not specified"}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="col-8">
-                    <div className="mb-6">
-                      <h3 className="font-semibold mb-2">Job Description</h3>
-                      <div
-                        className="prose max-w-none"
-                        dangerouslySetInnerHTML={{
-                          __html:
-                            selectedJob.job_description ||
-                            "No description provided",
-                        }}
-                      />
-                    </div>
-                  </div>
+        <div className="lg:w-1/3 mt-5">
+          {detailsLoading ? (
+            <div className="sticky top-4 p-6 bg-white rounded-lg shadow-lg border flex justify-center items-center h-64">
+              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+            </div>
+          ) : selectedJob ? (
+            <div className="sticky top-4 bg-white p-6 rounded-lg shadow-lg border">
+              <div className="flex items-start justify-between mb-4 ms-4">
+                <div>
+                  <h2 className="text-2xl font-bold mb-1">
+                    {selectedJob.job_title}
+                  </h2>
+                  <h3 className="text-lg text-gray-700">
+                    {selectedJob.employer_name}
+                  </h3>
                 </div>
+            
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 mb-6 ms-5">
+                <div>
+                  <p className="text-sm text-gray-500">Location</p>
+                  <p className="font-medium">
+                    {selectedJob.job_city ||
+                      city.charAt(0).toUpperCase() + city.slice(1)}
+                    {selectedJob.job_country && `, ${selectedJob.job_country}`}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500">Job Type</p>
+                  <p className="font-medium">
+                    {selectedJob.job_employment_type || "Full-time"}
+                  </p>
+                </div>
+                {selectedJob.job_min_salary && (
+                  <div>
+                    <p className="text-sm text-gray-500">Salary Range</p>
+                    <p className="font-medium">
+                      {selectedJob.job_min_salary} - {selectedJob.job_max_salary}{" "}
+                      {selectedJob.job_salary_currency}
+                    </p>
+                  </div>
+                )}
+                <div>
+                  <p className="text-sm text-gray-500">Posted</p>
+                  <p className="font-medium">
+                    {selectedJob.job_posted_at_timestamp
+                      ? new Date(
+                          selectedJob.job_posted_at_timestamp * 1000
+                        ).toLocaleDateString()
+                      : "Not specified"}
+                  </p>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <h3 className="font-semibold mb-2n ms-5">Job Description</h3>
+                <div
+                  className="prose max-w-none ms-5"
+                  dangerouslySetInnerHTML={{
+                    __html:
+                      selectedJob.job_description ||
+                      "No description provided",
+                  }}
+                />
               </div>
 
               {selectedJob.job_apply_link && (
@@ -256,8 +283,11 @@ export default function JobSearch() {
               )}
             </div>
           ) : (
-            <div className="bg-gray-50 p-6 rounded-lg border text-center">
-              <p className="text-gray-500">Select a job to view details</p>
+            <div className="sticky top-4 bg-gray-50 p-6 rounded-lg border text-center">
+              <div className="flex flex-col items-center justify-center h-64">
+ 
+                <p className="text-gray-500">Select a job to view details</p>
+              </div>
             </div>
           )}
         </div>
