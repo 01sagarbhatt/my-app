@@ -1,24 +1,29 @@
-import { MongoClient } from 'mongodb';
+// lib/mongodb.js
+import { MongoClient } from "mongodb";
+
+const uri = process.env.MONGODB_URI;
+const options = {};
 
 let client;
 let clientPromise;
 
-const uri = process.env.MONGODB_URI;
-const dbName = process.env.MONGODB_DB;
-
-if (!uri) {
-  throw new Error('Please add MONGODB_URI to your environment variables');
+if (!process.env.MONGODB_URI) {
+  throw new Error("Please add your Mongo URI to .env.local");
 }
 
-// In development, use a global variable to preserve value across module reloads caused by HMR (Hot Module Replacement)
-if (!global._mongoClientPromise) {
-  client = new MongoClient(uri); // ✅ No need for options
-  global._mongoClientPromise = client.connect();
+if (process.env.NODE_ENV === "development") {
+  if (!global._mongoClientPromise) {
+    client = new MongoClient(uri, options);
+    global._mongoClientPromise = client.connect();
+  }
+  clientPromise = global._mongoClientPromise;
+} else {
+  client = new MongoClient(uri, options);
+  clientPromise = client.connect();
 }
-clientPromise = global._mongoClientPromise;
 
-export const connectToDatabase = async () => {
+// ✅ This is the critical part
+export default async function connectDB() {
   const client = await clientPromise;
-  const db = client.db(dbName || "default");
-  return { client, db };
-};
+  return client.db(); // ✅ THIS RETURNS THE DB, NOT THE CLIENT
+}

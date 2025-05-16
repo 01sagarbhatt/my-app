@@ -3,7 +3,7 @@ import React from 'react';
 import { useParams } from 'next/navigation'; // import useParams hook
 import CollegeListPage from '@/app/_components/CollegeListPage';
 import RoomsList from '@/app/_components/RoomsList';
-import JobsPage from '@/app/_components/JobListPage';
+import JobCard from '@/app/_components/JobCard';
 import UserManagement from '@/app/_components/UserManagement';
 
 
@@ -20,9 +20,7 @@ export default function AdminSlugPage() {
   } else if (path === 'houses') {
     return <RoomsList />;
   } else if (path === 'jobs') {
-    return <JobsPage />;
-  } else if (path === 'users') {
-    return <UserManagement />;
+    return <JobCard />;
   } else {
     return <div><h2>404 - Page Not Found</h2></div>;
   }

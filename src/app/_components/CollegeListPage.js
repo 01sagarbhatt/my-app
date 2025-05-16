@@ -8,7 +8,7 @@ export default function CollegeListPage() {
   useEffect(() => {
     const fetchColleges = async () => {
       try {
-        const res = await fetch('/api/institutions'); // GET endpoint
+        const res = await fetch('/api/institutions');
         const data = await res.json();
         setColleges(data.result || []);
         setLoading(false);
@@ -46,16 +46,17 @@ export default function CollegeListPage() {
               <table className="table table-hover mb-0">
                 <thead className="table-light">
                   <tr>
-                    <th className="ps-4">College Name</th>
+                    <th>College Name</th>
                     <th>Address</th>
                     <th>Contact</th>
                     <th>Description</th>
+                    <th>Website</th>
                   </tr>
                 </thead>
                 <tbody>
                   {colleges.map((college) => (
                     <tr key={college._id} className="align-middle">
-                      <td className="ps-4 fw-semibold">{college.collegeName}</td>
+                      <td className="fw-semibold">{college.collegeName}</td>
                       <td>
                         <div className="text-wrap" style={{maxWidth: '200px'}} 
                              title={college.collegeAddress}>
@@ -71,10 +72,22 @@ export default function CollegeListPage() {
                         )}
                       </td>
                       <td>
-                        <div className="text-wrap" style={{maxWidth: '400px'}} 
+                        <div className="text-wrap" style={{maxWidth: '300px'}} 
                              title={college.collegeDescription}>
                           {college.collegeDescription}
                         </div>
+                      </td>
+                      <td>
+                        {college.universityLink && (
+                          <a 
+                            href={college.universityLink} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="btn px-5 btn-sm btn-outline-primary"
+                          >
+                            <i className="bi bi-box-arrow-up-right me-1"></i> Visit
+                          </a>
+                        )}
                       </td>
                     </tr>
                   ))}

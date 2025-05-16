@@ -30,13 +30,20 @@ export default function AdminDashboard() {
       description: "Add new colleges and manage existing ones",
       color: "bg-primary",
     },
-    {
-      name: "Add Universities",
-      icon: "bi-building",
-      path: "/admin/universities",
-      description: "Manage university listings and information",
+       {
+      name: "Add Jobs",
+      icon: "bi-people",
+      path: "/admin/jobs",
+      description: "View and manage all registered users",
       color: "bg-success",
     },
+    // {
+    //   name: "Add Universities",
+    //   icon: "bi-building",
+    //   path: "/admin/universities",
+    //   description: "Manage university listings and information",
+    //   color: "bg-success",
+    // },
     {
       name: "Room Management",
       icon: "bi-door-open",
@@ -44,6 +51,7 @@ export default function AdminDashboard() {
       description: "Add and manage PG rooms, houses and apartments",
       color: "bg-warning",
     },
+    
     {
       name: "User Management",
       icon: "bi-people",
@@ -51,6 +59,7 @@ export default function AdminDashboard() {
       description: "View and manage all registered users",
       color: "bg-info",
     },
+ 
   ];
 
   return (
@@ -90,7 +99,7 @@ export default function AdminDashboard() {
         ))}
 
         {/* Quick Stats Section */}
-        <div className="row mt-4">
+        {/* <div className="row mt-4">
           <div className="col-md-3 mb-4">
             <div className="card border-0 shadow-sm">
               <div className="card-body">
@@ -154,7 +163,7 @@ export default function AdminDashboard() {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );

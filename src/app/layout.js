@@ -5,7 +5,7 @@ import Footer from './_components/Footer';
 
 
   export const metadata = {
-    title: 'My App',
+    title: 'Sehar-Sehpathi',
     description: 'Welcome to my application',
   };
 
