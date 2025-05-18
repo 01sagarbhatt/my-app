@@ -189,7 +189,7 @@ const AboutUs = () => {
           <h2 className="fw-bold mb-4">Ready to Begin Your Journey?</h2>
         <Link href="/services">
                 <button className="btn btn-outline-secondary btn-lg px-4">
-                  Learn More
+                  Learn More..
                 </button>
               </Link>
        
