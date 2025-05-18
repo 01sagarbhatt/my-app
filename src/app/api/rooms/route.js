@@ -1,114 +1,166 @@
 import { NextResponse } from 'next/server';
-import mongoose from 'mongoose';
-import { ConnectionString } from '@/app/lib/database';
+import formidable from 'formidable';
+import fs from 'fs';
+import path from 'path';
+import connectDB from '@/app/lib/mongodb';
+import { Readable } from 'stream';
+import { ObjectId } from 'mongodb';
 
-const roomSchema = new mongoose.Schema({
-  type: String,
-  location: String,
-  rent: Number,
-  amenities: String,
-  availableFrom: Date,
-  createdAt: { type: Date, default: Date.now }
-});
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
 
-const Room = mongoose.models.Room || mongoose.model('Room', roomSchema);
+const uploadDir = path.join(process.cwd(), 'public', 'roomrent-images');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
 
-// pages/api/rooms.js or app/api/rooms/route.js
+function webRequestToNodeStream(webRequest) {
+  return Readable.from(webRequest.body);
+}
+
+export async function POST(request) {
+  const form = formidable({
+    multiples: true,
+    uploadDir: uploadDir,
+    keepExtensions: true,
+    maxFileSize: 10 * 1024 * 1024,
+  });
+
+  return new Promise(async (resolve, reject) => {
+    try {
+      const nodeReq = Object.assign(webRequestToNodeStream(request), {
+        headers: Object.fromEntries(request.headers),
+        method: request.method,
+        url: '',
+      });
+
+      form.parse(nodeReq, async (err, fields, files) => {
+        if (err) {
+          console.error('Formidable error:', err);
+          return resolve(NextResponse.json({ success: false, error: err.message }, { status: 500 }));
+        }
+
+        const { type, location, rent, amenities, availableFrom } = fields;
+
+        let imagePaths = [];
+        if (files.images) {
+          if (Array.isArray(files.images)) {
+            imagePaths = files.images.map((file) => '/roomrent-images/' + path.basename(file.filepath));
+          } else {
+            imagePaths = ['/roomrent-images/' + path.basename(files.images.filepath)];
+          }
+        }
+
+        const db = await connectDB();
+        const result = await db.collection('rooms').insertOne({
+          type,
+          location,
+          rent,
+          amenities,
+          availableFrom,
+          images: imagePaths,
+          createdAt: new Date(),
+        });
+
+        resolve(NextResponse.json({ success: true, id: result.insertedId }, { status: 201 }));
+      });
+    } catch (error) {
+      console.error('Unexpected error:', error);
+      resolve(NextResponse.json({ success: false, error: error.message }, { status: 500 }));
+    }
+  });
+}
 
 export async function GET() {
   try {
-    await mongoose.connect(ConnectionString);
-    const result = await Room.find().sort({ createdAt: -1 });
-    
-    // Return in the expected format
-    return NextResponse.json({
-      success: true,
-      result: result
-    });
-    
+    const db = await connectDB();
+    const rooms = await db.collection("rooms").find().toArray();
+    return NextResponse.json(rooms, { status: 200 });
   } catch (error) {
-    return NextResponse.json({
-      success: false,
-      error: error.message
-    }, { status: 500 });
-  }
-}
-
-// export async function GET() {
-//   try {
-//     await mongoose.connect(ConnectionString);
-//     const result = await Room.find().sort({ createdAt: -1 });
-//     return NextResponse.json(result);
-//   } catch (error) {
-//     return NextResponse.json(
-//       { error: error.message },
-//       { status: 500 }
-//     );
-//   }
-// }
-
-// export async function GET() {
-//   try {
-//     await mongoose.connect(ConnectionString);
-//     const result = await Room.find({});
-//     return NextResponse.json({ result, success: true });
-//   } catch (error) {
-//     return NextResponse.json({ error: error.message, success: false }, { status: 500 });
-//   }
-// }
-
-
-export async function POST(request) {
-  try {
-    await mongoose.connect(ConnectionString);
-
-    const body = await request.json();
-
-    const newRoom = new Room(body);
-    const savedRoom = await newRoom.save();
-
-    return NextResponse.json({
-      success: true,
-      message: "Room added successfully",
-      result: savedRoom,
-    });
-  } catch (error) {
-    return NextResponse.json(
-      { success: false, message: error.message },
-      { status: 500 }
-    );
+    console.error("GET /api/rooms error:", error);
+    return NextResponse.json({ error: "Failed to fetch rooms" }, { status: 500 });
   }
 }
 
 export async function DELETE(request) {
   try {
-    await mongoose.connect(ConnectionString);
+    const db = await connectDB();
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
-    
+
     if (!id) {
-      return NextResponse.json(
-        { error: 'Room ID is required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Room ID is required' }, { status: 400 });
     }
 
-    const result = await Room.findByIdAndDelete(id);
-    
-    if (!result) {
-      return NextResponse.json(
-        { error: 'Room not found' },
-        { status: 404 }
-      );
+    const result = await db.collection('rooms').deleteOne({ _id: new ObjectId(id) });
+
+    if (result.deletedCount === 0) {
+      return NextResponse.json({ error: 'Room not found' }, { status: 404 });
     }
 
-    return NextResponse.json(
-      { success: true, message: 'Room deleted successfully' }
-    );
+    return NextResponse.json({ success: true, message: 'Room deleted successfully' });
   } catch (error) {
-    return NextResponse.json(
-      { error: error.message },
-      { status: 500 }
-    );
+    console.error('DELETE error:', error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
+}
+export async function PATCH(request) {
+  const form = formidable({
+    multiples: true,
+    uploadDir: uploadDir,
+    keepExtensions: true,
+    maxFileSize: 10 * 1024 * 1024,
+  });
+
+  return new Promise(async (resolve, reject) => {
+    try {
+      const { searchParams } = new URL(request.url);
+      const id = searchParams.get('id');
+
+      if (!id) {
+        return resolve(NextResponse.json({ error: 'Room ID is required' }, { status: 400 }));
+      }
+
+      const nodeReq = Object.assign(webRequestToNodeStream(request), {
+        headers: Object.fromEntries(request.headers),
+        method: request.method,
+        url: '',
+      });
+
+      form.parse(nodeReq, async (err, fields, files) => {
+        if (err) {
+          return resolve(NextResponse.json({ error: err.message }, { status: 500 }));
+        }
+
+        const { type, location, rent, amenities, availableFrom } = fields;
+
+        const db = await connectDB();
+        const result = await db.collection('rooms').updateOne(
+          { _id: new ObjectId(id) },
+          {
+            $set: {
+              type,
+              location,
+              rent,
+              amenities,
+              availableFrom,
+              updatedAt: new Date(),
+            },
+          }
+        );
+
+        if (result.matchedCount === 0) {
+          return resolve(NextResponse.json({ error: 'Room not found' }, { status: 404 }));
+        }
+
+        resolve(NextResponse.json({ success: true, message: 'Room updated successfully' }));
+      });
+    } catch (error) {
+      console.error('PATCH error:', error);
+      resolve(NextResponse.json({ error: error.message }, { status: 500 }));
+    }
+  });
 }

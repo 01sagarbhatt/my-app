@@ -1,9 +1,24 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 const Services = () => {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/signup"); // ya "/signin", jo bhi aapka login route ho
+    }
+  }, [status, router]);
+
+  if (status === "loading") {
+    return <div className="text-center py-5">Checking session...</div>;
+  }
+
   const services = [
     {
       title: "Explore Colleges and Universities",
@@ -38,7 +53,7 @@ const Services = () => {
             <div key={index} className="col-md-4">
               <Link href={service.href} className="text-decoration-none">
                 <div className="card h-100 border-0 shadow-sm hover-shadow transition-all">
-                  <div className="card-img-top overflow-hidden" style={{height: "200px"}}>
+                  <div className="card-img-top overflow-hidden" style={{ height: "200px" }}>
                     <Image
                       src={service.image}
                       width={400}

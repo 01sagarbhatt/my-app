@@ -1,19 +1,21 @@
-'use client';
-import React, { useState, useEffect } from 'react';
+"use client";
+import React, { useState, useEffect } from "react";
 
 export default function RoomForm() {
   const [formData, setFormData] = useState({
-    type: 'Room',
-    location: '',
-    rent: '',
-    amenities: '',
-    availableFrom: '',
+    type: "Room",
+    location: "",
+    rent: "",
+    amenities: "",
+    availableFrom: "",
   });
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [images, setImages] = useState([]);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingRoomId, setEditingRoomId] = useState(null);
 
-  // Fetch rooms on component mount
   useEffect(() => {
     fetchRooms();
   }, []);
@@ -22,24 +24,22 @@ export default function RoomForm() {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch('/api/rooms');
-      
+      const response = await fetch("/api/rooms");
+
       if (!response.ok) {
-        throw new Error('Failed to fetch rooms');
+        throw new Error("Failed to fetch rooms");
       }
 
       const data = await response.json();
-      
-      // Handle both possible response formats
       const roomsData = Array.isArray(data) ? data : data?.result || [];
-      
+
       if (!Array.isArray(roomsData)) {
-        throw new Error('Invalid data format received');
+        throw new Error("Invalid data format received");
       }
 
       setRooms(roomsData);
     } catch (err) {
-      console.error('Error fetching rooms:', err);
+      console.error("Error fetching rooms:", err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -47,72 +47,102 @@ export default function RoomForm() {
   };
 
   const handleChange = (e) => {
-    setFormData({ 
-      ...formData, 
-      [e.target.name]: e.target.value 
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
     });
+  };
+
+  const handleEdit = (room) => {
+    setFormData({
+      type: room.type,
+      location: room.location,
+      rent: room.rent,
+      amenities: room.amenities,
+      availableFrom: room.availableFrom?.slice(0, 10) || "",
+    });
+    setEditingRoomId(room._id);
+    setIsEditing(true);
+    setImages([]);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('/api/rooms', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
+      const formPayload = new FormData();
+
+      Object.entries(formData).forEach(([key, value]) => {
+        formPayload.append(key, value);
+      });
+
+      images.forEach((img) => formPayload.append("images", img));
+
+      const url = isEditing ? `/api/rooms?id=${editingRoomId}` : "/api/rooms";
+      const method = isEditing ? "PATCH" : "POST";
+
+      const response = await fetch(url, {
+        method,
+        body: formPayload,
       });
 
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.message || 'Failed to add room');
+        throw new Error(result?.error || "Something went wrong.");
       }
 
-      alert('Room added successfully!');
+      alert(isEditing ? "Room updated!" : "Room added!");
+
       setFormData({
-        type: 'Room',
-        location: '',
-        rent: '',
-        amenities: '',
-        availableFrom: '',
+        type: "Room",
+        location: "",
+        rent: "",
+        amenities: "",
+        availableFrom: "",
       });
-      fetchRooms(); // Refresh the list
+      setImages([]);
+      setIsEditing(false);
+      setEditingRoomId(null);
+      fetchRooms();
     } catch (err) {
-      console.error('Error:', err);
-      alert(err.message || 'Something went wrong.');
+      console.error("Error:", err);
+      alert(err.message || "Something went wrong.");
     }
   };
 
   const handleDelete = async (id) => {
-    if (!confirm('Are you sure you want to delete this room?')) return;
-    
+    const confirmDelete = confirm("Are you sure you want to delete this room?");
+    if (!confirmDelete) return;
+
     try {
       const response = await fetch(`/api/rooms?id=${id}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
-      
+
+      const result = await response.json();
+
       if (!response.ok) {
-        const result = await response.json();
-        throw new Error(result.message || 'Failed to delete room');
+        throw new Error(result.error || "Failed to delete room");
       }
 
-      alert('Room deleted successfully!');
-      fetchRooms(); // Refresh the list
+      alert("Room deleted successfully!");
+      fetchRooms();
     } catch (err) {
-      console.error('Error deleting room:', err);
-      alert(err.message || 'Failed to delete room');
+      console.error("Error deleting room:", err);
+      alert(err.message || "Failed to delete room");
     }
   };
 
   return (
     <div className="container mt-5">
       <h3>Add Room / House</h3>
-      <form onSubmit={handleSubmit} className="border p-4 shadow-sm rounded bg-light mb-5">
+      <form
+        onSubmit={handleSubmit}
+        className="border p-4 shadow-sm rounded bg-light mb-5"
+      >
         <div className="mb-3">
           <label className="form-label">Type</label>
-          <select 
+          <select
             className="form-select"
             name="type"
             value={formData.type}
@@ -128,34 +158,34 @@ export default function RoomForm() {
 
         <div className="mb-3">
           <label className="form-label">Location</label>
-          <input 
-            type="text" 
-            className="form-control" 
+          <input
+            type="text"
+            className="form-control"
             name="location"
             value={formData.location}
             onChange={handleChange}
-            required 
+            required
           />
         </div>
 
         <div className="mb-3">
           <label className="form-label">Monthly Rent (₹)</label>
-          <input 
-            type="number" 
-            className="form-control" 
+          <input
+            type="number"
+            className="form-control"
             name="rent"
             value={formData.rent}
             onChange={handleChange}
-            required 
+            required
             min="0"
           />
         </div>
 
         <div className="mb-3">
           <label className="form-label">Available From</label>
-          <input 
-            type="date" 
-            className="form-control" 
+          <input
+            type="date"
+            className="form-control"
             name="availableFrom"
             value={formData.availableFrom}
             onChange={handleChange}
@@ -164,9 +194,9 @@ export default function RoomForm() {
 
         <div className="mb-3">
           <label className="form-label">Amenities (comma-separated)</label>
-          <input 
-            type="text" 
-            className="form-control" 
+          <input
+            type="text"
+            className="form-control"
             name="amenities"
             value={formData.amenities}
             onChange={handleChange}
@@ -174,8 +204,20 @@ export default function RoomForm() {
           />
         </div>
 
+        <div className="mb-3">
+          <label className="form-label">Room Images</label>
+          <input
+            type="file"
+            className="form-control"
+            name="images"
+            multiple
+            accept="image/*"
+            onChange={(e) => setImages([...e.target.files])}
+          />
+        </div>
+
         <button type="submit" className="btn btn-primary" disabled={loading}>
-          {loading ? 'Adding...' : 'Add Listing'}
+          {loading ? "Saving..." : isEditing ? "Update Listing" : "Add Listing"}
         </button>
       </form>
 
@@ -183,9 +225,7 @@ export default function RoomForm() {
       <div className="mt-5">
         <h4>Current Listings</h4>
         {error ? (
-          <div className="alert alert-danger">
-            Error loading rooms: {error}
-          </div>
+          <div className="alert alert-danger">Error loading rooms: {error}</div>
         ) : loading ? (
           <div className="text-center py-4">
             <div className="spinner-border text-primary" role="status">
@@ -213,10 +253,21 @@ export default function RoomForm() {
                     <td>{room.type}</td>
                     <td>{room.location}</td>
                     <td>{room.rent}</td>
-                    <td>{room.amenities || 'None'}</td>
-                    <td>{room.availableFrom ? new Date(room.availableFrom).toLocaleDateString() : 'N/A'}</td>
+                    <td>{room.amenities || "None"}</td>
                     <td>
-                      <button 
+                      {room.availableFrom
+                        ? new Date(room.availableFrom).toLocaleDateString()
+                        : "N/A"}
+                    </td>
+                    <td>
+                      <button
+                        onClick={() => handleEdit(room)}
+                        className="btn btn-sm btn-warning me-2"
+                        disabled={loading}
+                      >
+                        Edit
+                      </button>
+                      <button
                         onClick={() => handleDelete(room._id)}
                         className="btn btn-sm btn-danger"
                         disabled={loading}

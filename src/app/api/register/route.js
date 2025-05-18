@@ -11,7 +11,7 @@ export async function GET() {
       id: user._id.toString(),
       name: user.name,
       email: user.email,
-      role: user.role || 'Customer', // Default role if not specified
+      role: user.role || 'User', // Default role if not specified
       status: user.status,
       createdAt: user.createdAt
     }));

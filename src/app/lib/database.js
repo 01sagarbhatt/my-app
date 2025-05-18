@@ -1,2 +1,1 @@
-
-export const ConnectionString = "mongodb+srv://sagarbhatt7451:sagarbhatt7451@cluster0.q76o0.mongodb.net/mydatabase?retryWrites=true&w=majority&appName=Cluster0";
+export const ConnectionString = "mongodb+srv://seharsehpathi:seharsehpathi20012003@cluster0.2uenpdt.mongodb.net/mydatabase?retryWrites=true&w=majority&appName=Cluster0";

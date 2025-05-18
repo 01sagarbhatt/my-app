@@ -1,4 +1,3 @@
-// app/user-management/page.jsx
 'use client';
 import React, { useState, useEffect } from 'react';
 
@@ -33,11 +32,11 @@ export default function UserManagement() {
         const response = await fetch(`/api/register/${id}`, {
           method: 'DELETE'
         });
-        
+
         if (!response.ok) {
           throw new Error('Failed to delete user');
         }
-        
+
         setUsers(users.filter(user => user.id !== id));
       } catch (err) {
         alert(err.message);
@@ -46,65 +45,68 @@ export default function UserManagement() {
   };
 
   const handleEdit = (user) => {
-    // You can implement a modal or edit form here
     alert(`Edit user: ${user.name}`);
   };
 
   if (loading) {
-    return <div className="container mt-5">Loading users...</div>;
+    return <div className="container mt-5 text-center">Loading users...</div>;
   }
 
   if (error) {
-    return <div className="container mt-5">Error: {error}</div>;
+    return <div className="container mt-5 text-danger text-center">Error: {error}</div>;
   }
 
   return (
     <div className="container mt-5">
-      <h3>User Management</h3>
+      <h3 className="mb-4 text-primary">User Management</h3>
 
-      <table className="table table-bordered table-striped mt-3 shadow-sm">
-        <thead className="table-dark">
-          <tr>
-            <th>#</th>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Role</th>
-            <th>Status</th>
-            <th>Created At</th>
-            <th style={{ width: '150px' }}>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {users.length === 0 ? (
-            <tr><td colSpan="7" className="text-center">No users found</td></tr>
-          ) : (
-            users.map((user, index) => (
-              <tr key={user.id}>
-                <td>{index + 1}</td>
-                <td>{user.name}</td>
-                <td>{user.email}</td>
-                <td>{user.role}</td>
-                <td>{user.status}</td>
-                <td>{new Date(user.createdAt).toLocaleDateString()}</td>
-                <td>
-                  <button
-                    className="btn btn-sm btn-info me-2"
-                    onClick={() => handleEdit(user)}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    className="btn btn-sm btn-danger"
-                    onClick={() => handleDelete(user.id)}
-                  >
-                    Delete
-                  </button>
-                </td>
+      <div className="table-responsive shadow rounded">
+        <table className="table table-hover align-middle mb-0 bg-white">
+          <thead className="bg-primary text-white">
+            <tr>
+              <th scope="col" className="text-center">#</th>
+              <th scope="col">Name</th>
+              <th scope="col">Email</th>
+              <th scope="col">Role</th>
+              <th scope="col">Status</th>
+              <th scope="col">Created At</th>
+              <th scope="col" className="text-center" style={{ width: '150px' }}>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {users.length === 0 ? (
+              <tr>
+                <td colSpan="7" className="text-center py-4 text-muted">No users found</td>
               </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+            ) : (
+              users.map((user, index) => (
+                <tr key={user.id} className="fw-normal">
+                  <td className="text-center">{index + 1}</td>
+                  <td>{user.name}</td>
+                  <td>{user.email}</td>
+                  <td>{user.role}</td>
+                  <td>
+                    <span className={`badge ${user.status === 'active' ? 'bg-success' : 'bg-secondary'}`}>
+                      {user.status}
+                    </span>
+                  </td>
+                  <td>{new Date(user.createdAt).toLocaleDateString()}</td>
+                  <td className="text-center">
+                 
+                    <button
+                      className="btn btn-sm btn-outline-danger"
+                      onClick={() => handleDelete(user.id)}
+                      title="Delete User"
+                    >
+                      🗑️
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

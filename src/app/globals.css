@@ -56,4 +56,18 @@ main{
   font-size: 0.8rem;
 }
 
- 
+ .image-thumbnail {
+  cursor: pointer;
+  transition: transform 0.3s ease-in-out;
+}
+
+.image-thumbnail:hover {
+  transform: scale(1.1);
+}
+
+/* Fullscreen preview modal image */
+.fullscreen-image {
+  max-width: 90vw;
+  max-height: 80vh;
+  border-radius: 10px;
+}
