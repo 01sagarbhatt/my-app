@@ -31,7 +31,8 @@ const nextConfig = {
       'img.freepik.com',
       'images.pexels.com',
       'plus.unsplash.com',
-      'images.unsplash.com'
+      'images.unsplash.com',
+      'res.cloudinary.com'
     ],
     remotePatterns: [
       {

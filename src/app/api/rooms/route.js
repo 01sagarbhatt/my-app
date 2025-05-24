@@ -6,19 +6,23 @@ import connectDB from '@/app/lib/mongodb';
 import { Readable } from 'stream';
 import { ObjectId } from 'mongodb';
 
+import { uploadToCloudinary } from '@/app/lib/cloudinary';
+
 export const config = {
   api: {
     bodyParser: false,
   },
 };
 
+// Upload directory for local saving (if needed)
 const uploadDir = path.join(process.cwd(), 'public', 'roomrent-images');
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
-function webRequestToNodeStream(webRequest) {
-  return Readable.from(webRequest.body);
+// Helper function to convert Next.js Request body to Node Readable stream
+function webRequestToNodeStream(request) {
+  return Readable.from(request.body);
 }
 
 export async function POST(request) {
@@ -26,10 +30,10 @@ export async function POST(request) {
     multiples: true,
     uploadDir: uploadDir,
     keepExtensions: true,
-    maxFileSize: 10 * 1024 * 1024,
+    maxFileSize: 10 * 1024 * 1024, // 10MB
   });
 
-  return new Promise(async (resolve, reject) => {
+  return new Promise(async (resolve) => {
     try {
       const nodeReq = Object.assign(webRequestToNodeStream(request), {
         headers: Object.fromEntries(request.headers),
@@ -107,6 +111,7 @@ export async function DELETE(request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+
 export async function PATCH(request) {
   const form = formidable({
     multiples: true,
@@ -115,13 +120,15 @@ export async function PATCH(request) {
     maxFileSize: 10 * 1024 * 1024,
   });
 
-  return new Promise(async (resolve, reject) => {
+  return new Promise(async (resolve) => {
     try {
       const { searchParams } = new URL(request.url);
       const id = searchParams.get('id');
 
       if (!id) {
-        return resolve(NextResponse.json({ error: 'Room ID is required' }, { status: 400 }));
+        return resolve(
+          NextResponse.json({ error: 'Room ID is required' }, { status: 400 })
+        );
       }
 
       const nodeReq = Object.assign(webRequestToNodeStream(request), {
@@ -137,20 +144,20 @@ export async function PATCH(request) {
 
         const { type, location, rent, amenities, availableFrom } = fields;
 
-        // --- IMAGE UPDATE LOGIC START ---
-        let imagePaths;
+        // Upload images to Cloudinary
+        let imagePaths = [];
         if (files.images) {
-          if (Array.isArray(files.images)) {
-            imagePaths = files.images.map((file) => '/roomrent-images/' + path.basename(file.filepath));
-          } else {
-            imagePaths = ['/roomrent-images/' + path.basename(files.images.filepath)];
+          const imageArray = Array.isArray(files.images) ? files.images : [files.images];
+
+          for (const file of imageArray) {
+            const buffer = await fs.promises.readFile(file.filepath);
+            const url = await uploadToCloudinary(buffer);
+            imagePaths.push(url);
           }
         }
-        // --- IMAGE UPDATE LOGIC END ---
 
         const db = await connectDB();
 
-        // Prepare update object
         const updateObj = {
           type,
           location,
@@ -159,7 +166,7 @@ export async function PATCH(request) {
           availableFrom,
           updatedAt: new Date(),
         };
-        if (imagePaths) {
+        if (imagePaths.length > 0) {
           updateObj.images = imagePaths;
         }
 
@@ -172,7 +179,9 @@ export async function PATCH(request) {
           return resolve(NextResponse.json({ error: 'Room not found' }, { status: 404 }));
         }
 
-        resolve(NextResponse.json({ success: true, message: 'Room updated successfully' }));
+        resolve(
+          NextResponse.json({ success: true, message: 'Room updated successfully' })
+        );
       });
     } catch (error) {
       console.error('PATCH error:', error);
