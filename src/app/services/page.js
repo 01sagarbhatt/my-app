@@ -16,7 +16,7 @@ const Services = () => {
   }, [status, router]);
 
   if (status === "loading") {
-    return <div className="text-center py-5">Checking session...</div>;
+    return <div className="text-center py-5">Checking session....</div>;
   }
 
   const services = [
