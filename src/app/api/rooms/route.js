@@ -137,19 +137,35 @@ export async function PATCH(request) {
 
         const { type, location, rent, amenities, availableFrom } = fields;
 
+        // --- IMAGE UPDATE LOGIC START ---
+        let imagePaths;
+        if (files.images) {
+          if (Array.isArray(files.images)) {
+            imagePaths = files.images.map((file) => '/roomrent-images/' + path.basename(file.filepath));
+          } else {
+            imagePaths = ['/roomrent-images/' + path.basename(files.images.filepath)];
+          }
+        }
+        // --- IMAGE UPDATE LOGIC END ---
+
         const db = await connectDB();
+
+        // Prepare update object
+        const updateObj = {
+          type,
+          location,
+          rent,
+          amenities,
+          availableFrom,
+          updatedAt: new Date(),
+        };
+        if (imagePaths) {
+          updateObj.images = imagePaths;
+        }
+
         const result = await db.collection('rooms').updateOne(
           { _id: new ObjectId(id) },
-          {
-            $set: {
-              type,
-              location,
-              rent,
-              amenities,
-              availableFrom,
-              updatedAt: new Date(),
-            },
-          }
+          { $set: updateObj }
         );
 
         if (result.matchedCount === 0) {

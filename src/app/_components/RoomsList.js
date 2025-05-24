@@ -2,33 +2,42 @@
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 
-
 export default function RoomsList() {
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedRoom, setSelectedRoom] = useState(null);
-
-  useEffect(() => {
+  const [locations, setLocations] = useState([]);
+  const [selectedLocation, setSelectedLocation] = useState('');
+useEffect(() => {
   const fetchRooms = async () => {
     try {
       const response = await fetch('/api/rooms');
+      const data = await response.json();
+      console.log("API Response:", data);
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`API Error: ${response.status} - ${errorText}`);
-      }
+      const roomArray = Array.isArray(data)
+        ? data
+        : Array.isArray(data.rooms)
+        ? data.rooms
+        : Array.isArray(data.data?.rooms)
+        ? data.data.rooms
+        : [];
 
-      const data = await response.json(); // <-- this is an array directly
-      console.log("Fetched Rooms:", data);
+      console.log("Room Array:", roomArray);
 
-      if (Array.isArray(data)) {
-        setRooms(data);
-      } else {
-        throw new Error("Invalid data format received");
-      }
+      setRooms(roomArray);
 
+      const uniqueLocations = [
+        ...new Set(
+          roomArray
+            .map((room) => room.location?.[0]?.trim())
+            .filter(Boolean)
+        ),
+      ];
+      console.log("Unique Locations:", uniqueLocations);
+      setLocations(uniqueLocations);
     } catch (error) {
-      console.error('Fetch Error:', error.message || error);
+      console.error("Fetch error:", error);
     } finally {
       setLoading(false);
     }
@@ -38,22 +47,20 @@ export default function RoomsList() {
 }, []);
 
 
-const renderAmenities = (amenities) => {
-  if (!amenities) return null;
-
-  const items = Array.isArray(amenities)
-    ? amenities
-    : typeof amenities === 'string'
+  const renderAmenities = (amenities) => {
+    if (!amenities) return null;
+    const items = Array.isArray(amenities)
+      ? amenities
+      : typeof amenities === 'string'
       ? amenities.split(',')
       : [];
-
-  return items.map((item, index) => (
-    <span key={index} className="badge bg-light text-dark me-2 mb-2">
-      <i className={`bi ${getAmenityIcon(item.trim())} me-1`}></i>
-      {item.trim()}
-    </span>
-  ));
-};
+    return items.map((item, index) => (
+      <span key={index} className="badge bg-light text-dark me-2 mb-2">
+        <i className={`bi ${getAmenityIcon(item.trim())} me-1`}></i>
+        {item.trim()}
+      </span>
+    ));
+  };
 
   const getAmenityIcon = (amenity) => {
     const a = amenity.toLowerCase();
@@ -63,99 +70,123 @@ const renderAmenities = (amenities) => {
     return 'bi-house-door';
   };
 
-const RoomModal = ({ room, onClose }) => {
-  const [previewImg, setPreviewImg] = useState(null);
+  // Filter rooms by selected location
+// Filter rooms by selected location
+const filteredRooms = selectedLocation
+  ? rooms.filter((room) => room.location?.[0]?.trim() === selectedLocation)
+  : rooms;
 
-  return (
-    <>
-      {/* Main Modal */}
-      <div className="modal fade show" style={{ display: 'block', background: 'rgba(0,0,0,0.4)', zIndex: 1050 }} tabIndex="-1" role="dialog">
-        <div className="modal-dialog modal-lg modal-dialog-centered" role="document">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title">{room.type} Details</h5>
-              <button type="button" className="btn-close" onClick={onClose}></button>
-            </div>
-            <div className="modal-body">
-              {room.images?.length > 0 && (
-                <div className="mb-3 d-flex flex-wrap gap-2">
-                  {room.images.map((img, idx) => (
-                    <Image
-                      key={idx}
-                      src={img}
-                      alt={`Room ${idx + 1}`}
-                      width={120}
-                      height={90}
-                      className="image-thumbnail"
-                      style={{ objectFit: 'cover', borderRadius: 8 }}
-                      onClick={() => setPreviewImg(img)}
-                    />
-                  ))}
-                </div>
-              )}
-              <div className="mb-3"><strong>Location:</strong> {room.location}</div>
-              <div className="mb-3"><strong>Rent:</strong> ₹{room.rent}/month</div>
-              {room.availableFrom && (
-                <div className="mb-3">
-                  <strong>Available from:</strong> {new Date(room.availableFrom).toLocaleDateString()}
-                </div>
-              )}
-              {room.amenities && (
-                <div className="mb-3">
-                  <strong>Amenities:</strong>
-                  <div className="d-flex flex-wrap mt-1">{renderAmenities(room.amenities)}</div>
-                </div>
-              )}
-              {room.description && (
-                <div className="mb-3">
-                  <strong>Description:</strong>
-                  <div>{room.description}</div>
-                </div>
-              )}
-              {room.contact && (
-                <div className="mb-3">
-                  <strong>Contact:</strong> {room.contact}
-                </div>
-              )}
-            </div>
-            <div className="modal-footer">
-              <button type="button" className="btn btn-secondary" onClick={onClose}>Close</button>
+
+  const RoomModal = ({ room, onClose }) => {
+    const [previewImg, setPreviewImg] = useState(null);
+
+    return (
+      <>
+        {/* Main Modal */}
+        <div className="modal fade show" style={{ display: 'block', background: 'rgba(0,0,0,0.4)', zIndex: 1050 }} tabIndex="-1" role="dialog">
+          <div className="modal-dialog modal-lg modal-dialog-centered" role="document">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">{room.type} Details</h5>
+                <button type="button" className="btn-close" onClick={onClose}></button>
+              </div>
+              <div className="modal-body">
+                {room.images?.length > 0 && (
+                  <div className="mb-3 d-flex flex-wrap gap-2">
+                    {room.images.map((img, idx) => (
+                      <Image
+                        key={idx}
+                        src={img}
+                        alt={`Room ${idx + 1}`}
+                        width={120}
+                        height={90}
+                        className="image-thumbnail"
+                        style={{ objectFit: 'cover', borderRadius: 8 }}
+                        onClick={() => setPreviewImg(img)}
+                      />
+                    ))}
+                  </div>
+                )}
+                <div className="mb-3"><strong>Location:</strong> {room.location}</div>
+                <div className="mb-3"><strong>Rent:</strong> ₹{room.rent}/month</div>
+                {room.availableFrom && (
+                  <div className="mb-3">
+                    <strong>Available from:</strong> {new Date(room.availableFrom).toLocaleDateString()}
+                  </div>
+                )}
+                {room.amenities && (
+                  <div className="mb-3">
+                    <strong>Amenities:</strong>
+                    <div className="d-flex flex-wrap mt-1">{renderAmenities(room.amenities)}</div>
+                  </div>
+                )}
+                {room.description && (
+                  <div className="mb-3">
+                    <strong>Description:</strong>
+                    <div>{room.description}</div>
+                  </div>
+                )}
+                {room.contact && (
+                  <div className="mb-3">
+                    <strong>Contact:</strong> {room.contact}
+                  </div>
+                )}
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={onClose}>Close</button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Image Preview Modal */}
-      {previewImg && (
-        <div
-          className="modal fade show"
-          style={{
-            display: 'block',
-            background: 'rgba(0, 0, 0, 0.85)',
-            zIndex: 1060
-          }}
-          onClick={() => setPreviewImg(null)}
-        >
-          <div className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
-            <Image
-              src={previewImg}
-              alt="Preview"
-              width={900}
-              height={600}
-              className="fullscreen-image"
-            />
+        {/* Image Preview Modal */}
+        {previewImg && (
+          <div
+            className="modal fade show"
+            style={{
+              display: 'block',
+              background: 'rgba(0, 0, 0, 0.85)',
+              zIndex: 1060
+            }}
+            onClick={() => setPreviewImg(null)}
+          >
+            <div className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
+              <Image
+                src={previewImg}
+                alt="Preview"
+                width={900}
+                height={600}
+                className="fullscreen-image"
+              />
+            </div>
           </div>
-        </div>
-      )}
-    </>
-  );
-};
+        )}
+      </>
+    );
+  };
 
   return (
     <div className="container py-5">
       <div className="text-center mb-5">
         <h2 className="display-5 fw-bold text-primary">Available Rooms & Houses</h2>
         <p className="lead text-muted">Find your perfect accommodation</p>
+      </div>
+
+      {/* Location Filter */}
+      <div className="mb-4">
+        <label className="form-label me-2 fw-semibold">Filter by Location:</label>
+        <select
+          className="form-select d-inline-block w-auto"
+          value={selectedLocation}
+          onChange={(e) => setSelectedLocation(e.target.value)}
+        >
+          <option value="">All Locations</option>
+          {locations.map((loc, idx) => (
+            <option key={idx} value={loc}>
+              {loc.charAt(0).toUpperCase() + loc.slice(1)}
+            </option>
+          ))}
+        </select>
       </div>
 
       {loading ? (
@@ -165,9 +196,9 @@ const RoomModal = ({ room, onClose }) => {
           </div>
           <p className="mt-3">Loading accommodations...</p>
         </div>
-      ) : rooms.length > 0 ? (
+      ) : filteredRooms.length > 0 ? (
         <div className="row g-4">
-          {rooms.map((room, index) => (
+          {filteredRooms.map((room, index) => (
             <div className="col-lg-4 col-md-6" key={index}>
               <div className="card h-100 border-0 shadow-sm hover-shadow transition-all">
                 <div className="card-img-top bg-secondary bg-opacity-10" style={{ height: '200px', position: 'relative' }}>
