@@ -1,11 +1,10 @@
 import { NextResponse } from 'next/server';
 import formidable from 'formidable';
 import fs from 'fs';
+import { Readable } from 'stream';
 import path from 'path';
 import connectDB from '@/app/lib/mongodb';
-import { Readable } from 'stream';
 import { ObjectId } from 'mongodb';
-
 import { uploadToCloudinary } from '@/app/lib/cloudinary';
 
 export const config = {
@@ -14,13 +13,7 @@ export const config = {
   },
 };
 
-// Upload directory for local saving (if needed)
-const uploadDir = path.join(process.cwd(), 'public', 'roomrent-images');
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-// Helper function to convert Next.js Request body to Node Readable stream
+// Helper to convert Next.js request body to Node stream
 function webRequestToNodeStream(request) {
   return Readable.from(request.body);
 }
@@ -28,9 +21,9 @@ function webRequestToNodeStream(request) {
 export async function POST(request) {
   const form = formidable({
     multiples: true,
-    uploadDir: uploadDir,
+    uploadDir: '/tmp', // ✅ TEMP folder for serverless env
     keepExtensions: true,
-    maxFileSize: 10 * 1024 * 1024, // 10MB
+    maxFileSize: 10 * 1024 * 1024,
   });
 
   return new Promise(async (resolve) => {
@@ -43,7 +36,6 @@ export async function POST(request) {
 
       form.parse(nodeReq, async (err, fields, files) => {
         if (err) {
-          console.error('Formidable error:', err);
           return resolve(NextResponse.json({ success: false, error: err.message }, { status: 500 }));
         }
 
@@ -51,10 +43,11 @@ export async function POST(request) {
 
         let imagePaths = [];
         if (files.images) {
-          if (Array.isArray(files.images)) {
-            imagePaths = files.images.map((file) => '/roomrent-images/' + path.basename(file.filepath));
-          } else {
-            imagePaths = ['/roomrent-images/' + path.basename(files.images.filepath)];
+          const imageArray = Array.isArray(files.images) ? files.images : [files.images];
+          for (const file of imageArray) {
+            const buffer = await fs.promises.readFile(file.filepath);
+            const url = await uploadToCloudinary(buffer);
+            imagePaths.push(url);
           }
         }
 
@@ -72,7 +65,7 @@ export async function POST(request) {
         resolve(NextResponse.json({ success: true, id: result.insertedId }, { status: 201 }));
       });
     } catch (error) {
-      console.error('Unexpected error:', error);
+      console.error('POST error:', error);
       resolve(NextResponse.json({ success: false, error: error.message }, { status: 500 }));
     }
   });
@@ -84,7 +77,7 @@ export async function GET() {
     const rooms = await db.collection("rooms").find().toArray();
     return NextResponse.json(rooms, { status: 200 });
   } catch (error) {
-    console.error("GET /api/rooms error:", error);
+    console.error("GET error:", error);
     return NextResponse.json({ error: "Failed to fetch rooms" }, { status: 500 });
   }
 }
@@ -115,7 +108,7 @@ export async function DELETE(request) {
 export async function PATCH(request) {
   const form = formidable({
     multiples: true,
-    uploadDir: uploadDir,
+    uploadDir: '/tmp', // ✅ TEMP folder for serverless env
     keepExtensions: true,
     maxFileSize: 10 * 1024 * 1024,
   });
@@ -126,9 +119,7 @@ export async function PATCH(request) {
       const id = searchParams.get('id');
 
       if (!id) {
-        return resolve(
-          NextResponse.json({ error: 'Room ID is required' }, { status: 400 })
-        );
+        return resolve(NextResponse.json({ error: 'Room ID is required' }, { status: 400 }));
       }
 
       const nodeReq = Object.assign(webRequestToNodeStream(request), {
@@ -144,11 +135,9 @@ export async function PATCH(request) {
 
         const { type, location, rent, amenities, availableFrom } = fields;
 
-        // Upload images to Cloudinary
         let imagePaths = [];
         if (files.images) {
           const imageArray = Array.isArray(files.images) ? files.images : [files.images];
-
           for (const file of imageArray) {
             const buffer = await fs.promises.readFile(file.filepath);
             const url = await uploadToCloudinary(buffer);
@@ -157,7 +146,6 @@ export async function PATCH(request) {
         }
 
         const db = await connectDB();
-
         const updateObj = {
           type,
           location,
@@ -166,6 +154,7 @@ export async function PATCH(request) {
           availableFrom,
           updatedAt: new Date(),
         };
+
         if (imagePaths.length > 0) {
           updateObj.images = imagePaths;
         }
@@ -179,9 +168,7 @@ export async function PATCH(request) {
           return resolve(NextResponse.json({ error: 'Room not found' }, { status: 404 }));
         }
 
-        resolve(
-          NextResponse.json({ success: true, message: 'Room updated successfully' })
-        );
+        resolve(NextResponse.json({ success: true, message: 'Room updated successfully' }));
       });
     } catch (error) {
       console.error('PATCH error:', error);
