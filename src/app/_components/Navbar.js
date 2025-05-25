@@ -40,6 +40,8 @@ const Navbar = () => {
     { href: "/about", label: "About" },
     ...(session ? [{ href: "/services", label: "Explore Now" }] : []),
     { href: "/contact", label: "Contact" },
+    ...(session ? [{ href: "/user-dashboard", label: "Dashboard" }] : []),
+
   ];
 
   return (
@@ -82,7 +84,6 @@ const Navbar = () => {
             {session ? (
               <div className="m-auto">
                 
-                
                 <Image
                   src={session.user?.image}
                   alt="Profile"
@@ -100,6 +101,7 @@ const Navbar = () => {
                   Sign out
                 </button>
                 
+               
 
               </div>
               
