@@ -1,7 +1,11 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import { useParams } from 'next/navigation'; // import useParams hook
+
 
 export default function AddJobs() {
+  const params = useParams(); // { slug: ['a', 'b', 'c'] }
+  const path = 'user/' + params.slug.join('/');
   const initialForm = {
     job_title: "",
     employer_name: "",
@@ -200,8 +204,8 @@ export default function AddJobs() {
           )}
         </div>
       </form>
-
-      <hr className="my-5" />
+<div style={{display : path === 'user/add-jobs' ? 'none' : 'block'}}>
+        <hr className="my-5" />
       <h3 className="mb-3">Job List</h3>
       {jobs.length === 0 ? (
         <p>No jobs yet.</p>
@@ -255,5 +259,7 @@ export default function AddJobs() {
         </div>
       )}
     </div>
+    </div>
+
   );
 }

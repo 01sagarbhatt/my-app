@@ -1,7 +1,12 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useParams } from 'next/navigation'; // import useParams hook
+
 
 const Add_Colleges = () => {
+  const params = useParams(); // { slug: ['a', 'b', 'c'] }
+const path = 'user/' + params.slug.join('/');
+// console.log('Path:', path);
   const [formData, setFormData] = useState({
     collegeName: "",
     collegeAddress: "",
@@ -245,7 +250,7 @@ const Add_Colleges = () => {
       </div>
 
       {/* Colleges Table */}
-      <div className="row">
+      <div className="row" style={{display : path === 'user/add-colleges' ?'none' : 'block'}}>
         <div className="col-12">
           <div className="card shadow-sm">
             <div className="card-header bg-light">

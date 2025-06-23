@@ -1,11 +1,17 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import { useParams } from 'next/navigation'; // import useParams hook
+
 
 export default function RoomForm() {
+const params = useParams(); // { slug: ['a', 'b', 'c'] }
+const path = 'user/' + params.slug.join('/');
+// console.log('Path:', path);
   const [formData, setFormData] = useState({
     type: "Room",
     location: "",
     rent: "",
+    mobile: "",
     amenities: "",
     availableFrom: "",
   });
@@ -58,6 +64,7 @@ export default function RoomForm() {
       type: room.type,
       location: room.location,
       rent: room.rent,
+      mobile: room.mobile,
       amenities: room.amenities,
       availableFrom: room.availableFrom?.slice(0, 10) || "",
     });
@@ -97,6 +104,7 @@ export default function RoomForm() {
         type: "Room",
         location: "",
         rent: "",
+        mobile: "",
         amenities: "",
         availableFrom: "",
       });
@@ -182,6 +190,19 @@ export default function RoomForm() {
         </div>
 
         <div className="mb-3">
+          <label className="form-label">Mobile Number</label>
+          <input
+            type="number"
+            className="form-control"
+            name="mobile"
+            value={formData.mobile}
+            onChange={handleChange}
+            required
+            min="0"
+          />
+        </div>
+
+        <div className="mb-3">
           <label className="form-label">Available From</label>
           <input
             type="date"
@@ -222,7 +243,7 @@ export default function RoomForm() {
       </form>
 
       {/* Room List Section */}
-      <div className="mt-5">
+      <div className="mt-5" style={{display : path === 'user/add-rooms' ?'none' : 'block'}}>
         <h4>Current Listings</h4>
         {error ? (
           <div className="alert alert-danger">Error loading rooms: {error}</div>

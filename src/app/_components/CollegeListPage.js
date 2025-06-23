@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
+import Link from "next/link";
 
 export default function CollegeListPage() {
   const [colleges, setColleges] = useState([]);
@@ -24,9 +25,23 @@ export default function CollegeListPage() {
   return (
     <div className="container py-4">
       <div className="card shadow-sm border-0">
-        <div className="card-header bg-primary text-white">
-          <h2 className="h4 mb-0 text-center">List of Colleges / Universities</h2>
+        <div className="card-header bg-primary text-white d-flex justify-content-between ">
+    <div>
+          <h2 className="h4 mb-0">List of Colleges / Universities</h2>
+
+    </div>
+    <div>
+       <div className="ms-auto">
+          <Link href="/user/add-colleges">
+            <button className="btn btn-danger w-100">
+              Add Universities <i className="bi bi-arrow-right ms-2"></i>
+            </button>
+          </Link>
         </div>
+    </div>
+        </div>
+        
+         
         
         <div className="card-body p-0">
           {loading ? (

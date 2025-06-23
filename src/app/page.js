@@ -136,7 +136,7 @@ export default function Home() {
         <div className="container">
           <div className="text-center mb-5">
             <h2 className="fw-bold">
-              Discover a New World with Sehar-Saipathi
+              Discover a New World with Sehar-Sehpathi
             </h2>
             <p
               className="lead text-muted mx-auto"

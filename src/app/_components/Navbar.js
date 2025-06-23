@@ -4,11 +4,15 @@ import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
+import { useParams } from 'next/navigation'; // import useParams hook
+
 
 
 
 const Navbar = () => {
+  
   const pathname = usePathname();
+  console.log('Pathname:', pathname);
   const { data: session, status } = useSession();
   const [isMounted, setIsMounted] = useState(false);
 
@@ -40,7 +44,7 @@ const Navbar = () => {
     { href: "/about", label: "About" },
     ...(session ? [{ href: "/services", label: "Explore Now" }] : []),
     { href: "/contact", label: "Contact" },
-    ...(session ? [{ href: "/user-dashboard", label: "Dashboard" }] : []),
+    // ...(session ? [{ href: "/user-dashboard", label: "Dashboard" }] : []),
 
   ];
 
@@ -83,14 +87,14 @@ const Navbar = () => {
           <div className="d-flex justify-content-between">
             {session ? (
               <div className="m-auto">
-                
+{/*                 
                 <Image
                   src={session.user?.image}
                   alt="Profile"
                   width="24"
                   height="24"
                   className="rounded-circle me-2"
-                />
+                /> */}
                 {session.user?.name}
 
                 
@@ -106,7 +110,7 @@ const Navbar = () => {
               </div>
               
             ) : (
-              <>
+              <div style={{display : pathname.startsWith("/admin") ?'none' : 'block'}}>
                 <Link
                   href="/login"
                   className="btn btn-outline-dark me-2 rounded-5 px-3"
@@ -116,7 +120,7 @@ const Navbar = () => {
                 <Link href="/signup" className="btn btn-dark rounded-5 px-3">
                   Sign Up
                 </Link>
-              </>
+              </div>
             )}
           </div>
         </div>

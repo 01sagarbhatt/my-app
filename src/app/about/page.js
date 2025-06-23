@@ -51,9 +51,9 @@ const AboutUs = () => {
         <p className="fs-5">
           Realizing many others faced similar issues, she gathered a team of experts to create a solution. Sehar Sehpathi was born – a platform to guide newcomers through every step of relocation. Launched in 2024, we now help thousands of migrants and students across multiple cities. Our mission is to make every relocation feel like the start of an exciting new adventure.
         </p>
-        <p className="fs-5 mt-4">
+        {/* <p className="fs-5 mt-4">
           <strong>Sehar Sehpathi</strong> was developed as a final year project by B.Tech (Bachelor of Technology) students of <strong>Swami Rama Himalayan University (SRHU)</strong>. The team includes <strong>Abhishek Singh, Saumya Thapliyal, Sukhbir Rawat, Jai Semwal, Shubham Butola  </strong> and <strong>Shriyansh Rawat</strong> — all committed to building meaningful solutions for real-life student challenges.
-        </p>
+        </p> */}
       </div>
     </div>
   </div>

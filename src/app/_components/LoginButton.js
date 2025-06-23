@@ -139,12 +139,12 @@ export default function LoginForm() {
                       )}
                     </button>
                   </div>
-
+{/* 
                   <div className="text-center">
                     <a href="#forgot-password" className="text-decoration-none">
                       Forgot password?
                     </a>
-                  </div>
+                  </div> */}
                 </form>
               </div>
             </div>

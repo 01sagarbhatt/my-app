@@ -1,5 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
+
 
 export default function JobListPage() {
   const [jobs, setJobs] = useState([]);
@@ -35,6 +37,7 @@ export default function JobListPage() {
       <h1 className="mb-4 display-5 text-primary">Latest Job Openings</h1>
 
       {/* Location Filter */}
+      <div className='d-flex'>
       <div className="mb-4">
         <label className="form-label me-2 fw-semibold">Filter by Location:</label>
         <select
@@ -50,6 +53,14 @@ export default function JobListPage() {
           ))}
         </select>
       </div>
+                <div className="ms-auto">
+          <Link href="/user/add-jobs" className="text-decoration-none">
+            <button className="btn btn-outline-success w-100">
+              Add Jobs <i className="bi bi-arrow-right ms-2"></i>
+            </button>
+          </Link>
+        </div>
+        </div>
 
       {filteredJobs.length === 0 ? (
         <p className="text-muted fs-5">No jobs found for selected location.</p>

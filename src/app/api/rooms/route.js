@@ -39,7 +39,7 @@ export async function POST(request) {
           return resolve(NextResponse.json({ success: false, error: err.message }, { status: 500 }));
         }
 
-        const { type, location, rent, amenities, availableFrom } = fields;
+        const { type, location, rent, mobile, amenities, availableFrom } = fields;
 
         let imagePaths = [];
         if (files.images) {
@@ -56,10 +56,12 @@ export async function POST(request) {
           type,
           location,
           rent,
+          mobile,
           amenities,
           availableFrom,
           images: imagePaths,
           createdAt: new Date(),
+          default: false,
         });
 
         resolve(NextResponse.json({ success: true, id: result.insertedId }, { status: 201 }));
