@@ -3,12 +3,10 @@ import Footer from './_components/Footer';
   import Navbar from './_components/Navbar';
   import './globals.css';
 
-
   export const metadata = {
     title: 'Sehar-Sehpathi',
     description: 'Welcome to my application',
   };
-
   export default function RootLayout({ children }) {
     return (
       <html lang="en">

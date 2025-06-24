@@ -10,7 +10,7 @@ export default function AddJobs() {
     job_title: "",
     employer_name: "",
     job_description: "",
-    job_city: "delhi",
+    job_city: "Dehradun",
     job_employment_type: "Full-time",
     job_min_salary: "",
     job_max_salary: "",

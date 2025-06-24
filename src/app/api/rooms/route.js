@@ -135,7 +135,7 @@ export async function PATCH(request) {
           return resolve(NextResponse.json({ error: err.message }, { status: 500 }));
         }
 
-        const { type, location, rent, amenities, availableFrom } = fields;
+        const { type, location, rent, mobile, amenities, availableFrom } = fields;
 
         let imagePaths = [];
         if (files.images) {
@@ -152,6 +152,7 @@ export async function PATCH(request) {
           type,
           location,
           rent,
+          mobile,
           amenities,
           availableFrom,
           updatedAt: new Date(),

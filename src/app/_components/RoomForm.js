@@ -59,19 +59,20 @@ const path = 'user/' + params.slug.join('/');
     });
   };
 
-  const handleEdit = (room) => {
-    setFormData({
-      type: room.type,
-      location: room.location,
-      rent: room.rent,
-      mobile: room.mobile,
-      amenities: room.amenities,
-      availableFrom: room.availableFrom?.slice(0, 10) || "",
-    });
-    setEditingRoomId(room._id);
-    setIsEditing(true);
-    setImages([]);
-  };
+const handleEdit = (room) => {
+  setFormData({
+    type: room.type || "Room",
+    location: room.location || "",
+    rent: room.rent || "",
+    mobile: room.mobile || "", // ✅ Ensures mobile is prefilled
+    amenities: room.amenities || "",
+    availableFrom: room.availableFrom?.slice(0, 10) || "",
+  });
+  setEditingRoomId(room._id);
+  setIsEditing(true);
+  setImages([]);
+};
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
