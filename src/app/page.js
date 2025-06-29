@@ -17,6 +17,9 @@ export default function Home() {
   // Decide destination based on session
   const linkHref = session?.user ? "/services" : "/signup";
 
+
+
+
   return (
     <>
       <Head>
@@ -26,6 +29,8 @@ export default function Home() {
           content="Helping migrants and students settle in new towns"
         />
       </Head>
+
+
 
       {/* Hero Banner */}
       <section className="hero-banner position-relative overflow-hidden">
