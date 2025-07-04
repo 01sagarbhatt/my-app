@@ -21,13 +21,12 @@ import Footer from './_components/Footer';
         />
       </head>
         <body className="h-100vh flex flex-col">
-          {/* <h1>Your website has been taken down because the payment has not been made. Please make the payment first.
-</h1> */}
-           {/* <SessionWrapper>
+
+           <SessionWrapper>
           <Navbar />
           <main>{children}</main>
           <Footer />
-        </SessionWrapper> */}
+        </SessionWrapper>
         </body>
       </html>
     );
